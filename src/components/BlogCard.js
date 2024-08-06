@@ -18,7 +18,7 @@ const BlogCard = ({blog}) => {
         <p className="date">{date}</p>
         <h5 className="title">{blog.title}</h5>
         <p className="desc">
-          {blog.description}
+          {blog?.description?.substr(0,70) + "..."}
         </p>
         <Link to={`/blog/${blog._id}`} className="button">
           Read More

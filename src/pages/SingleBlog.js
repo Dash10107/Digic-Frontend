@@ -38,8 +38,12 @@ const SingleBlog = () => {
             <p className="title">{ new Date(blogState?.createdAt).toLocaleDateString()}</p >
             </div>
             <img src={ blogState?.images?.length >0 ?   blogState.images[0].url : imageArray[Math.floor(Math.random()*imageArray.length)]} className="img-fluid w-100 my-4" alt="blog" />
-            <p>
-              {blogState?.description}
+            <p
+            dangerouslySetInnerHTML={
+              {__html: blogState?.description}
+            }
+            >
+
             </p>
           </div>
         </div>

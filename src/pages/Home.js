@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom';
 import Container from '../components/Container';
 import { services,blogs,products } from '../utils/Data';
@@ -8,7 +8,24 @@ import ProductCard from '../components/ProductCard';
 import SpecialProduct from '../components/SpecialProduct';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
+import {useDispatch, useSelector} from 'react-redux';
+import { getBlogs } from '../features/blogs/blogSlice'
+import { getAllProducts } from '../features/products/productSlice';
+
 const Home = () => {
+  const dispatch = useDispatch();
+  const getAllBlogs = ()=>{
+    dispatch(getBlogs());
+  }
+
+
+  const getProducts = ()=>{
+    dispatch(getAllProducts());
+  }
+useEffect(()=>{getProducts();getAllBlogs()},[])
+const blogsState = useSelector(state=>state?.blog?.blogs);
+const productState = useSelector(state=>state?.product?.products);
+
   return (
     <>
     <Container class1="home-wrapper-1 py-5">
@@ -201,7 +218,13 @@ const Home = () => {
           <div className="col-12">
             <h3 className="section-heading">Featured Collection</h3>
           </div>
-          {products.map((product)=>(<ProductCard key={product.id} product={product} />))}
+          {productState.slice(0,8).map((product)=>{
+            if(product.tags === "featured"){
+            return <ProductCard key={product._id} product={product} />
+            }
+              else return <></>
+            
+          })}
           
 
         </div>
@@ -277,10 +300,16 @@ const Home = () => {
           </div>
         </div>
         <div className="row">
-          <SpecialProduct />
-          <SpecialProduct />
-          <SpecialProduct />
-          <SpecialProduct />
+        {
+          productState?.slice(0,4).map((product)=>{
+            if(product.tags === "special"){
+              return <SpecialProduct product={product}  />
+            }else{
+              return <></>
+            }
+})
+        }
+          
         </div>
       </Container>
       <Container class1="marque-wrapper home-wrapper-2 py-5">
@@ -325,9 +354,9 @@ const Home = () => {
           </div>
         </div>
         <div className="row">
-          {blogs.map((blog,ind)=>(
-          <div className="col-3">
-          <BlogCard blog={blog} key={blog.id} />
+          {blogsState.slice(0,4).map((blog)=>(
+          <div className="col-3" key={blog._id}>
+          <BlogCard blog={blog}  />
         </div>
           ))}
 
