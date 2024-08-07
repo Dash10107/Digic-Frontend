@@ -24,13 +24,7 @@ const ProductCard = (props) => {
         } `}
       >
         <Link
-          to={`${
-            location.pathname === "/"
-              ? "/product/:id"
-              : location.pathname === "/product/:id"
-              ? "/product/:id"
-              : ":id"
-          }`}
+            to={`/product/${product._id}`}
           className="product-card position-relative"
         >
           <div className="wishlist-icon position-absolute">
@@ -73,7 +67,7 @@ const ProductCard = (props) => {
                 <img src="../images/prodcompare.svg" alt="compare" />
               </button>
               <button className="border-0 bg-transparent">
-                <img src="../images/view.svg" alt="view" />
+                <img src="../images/view.svg"  alt="view" />
               </button>
               <button className="border-0 bg-transparent">
                 <img src="../images/add-cart.svg" alt="addcart" />

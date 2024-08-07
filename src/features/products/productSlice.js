@@ -15,6 +15,17 @@ export  const getAllProducts = createAsyncThunk(
     }
 )
 
+export  const getAProducts = createAsyncThunk(
+    "product/get-single",
+    async(productId,thunkAPI)=>{
+        try {
+            return await productService.getAProduct(productId);
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error)
+        }
+    }
+)
+
 export const addToWishlist = createAsyncThunk("product/wishlist", async (productId,thunkAPI) => {
     try {
         const response = await productService.addToWishlist(productId);
@@ -23,6 +34,16 @@ export const addToWishlist = createAsyncThunk("product/wishlist", async (product
         return thunkAPI.rejectWithValue(error)
     }
 })
+
+export const rateProduct = createAsyncThunk("product/rating", async (rating,thunkAPI) => {
+    try {
+        const response = await productService.rateTheProduct(rating);
+        return response;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error)
+    }
+})
+
 
 
 
@@ -76,6 +97,42 @@ export const productSlice = createSlice({
             state.isSuccess = false;
             state.message = action.error;
         });
+        builder
+        .addCase(getAProducts.pending,(state)=>{
+            state.isLoading = true; 
+        })
+        .addCase(getAProducts.fulfilled, (state, action) => {
+            state.singleProduct = action.payload;
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.isError = false;
+        })
+        .addCase(getAProducts.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+            state.isSuccess = false;
+            state.message = action.error;
+            toast.error("Couldnt Fetch Single Product " + state.message);
+        });
+        builder.addCase(rateProduct.pending, (state) => {
+            state.isLoading = true;
+        }
+        )
+        .addCase(rateProduct.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.isError = false;
+            state.rateProduct = action.payload;
+            state.message = "Product rated successfully";
+
+        })
+        .addCase(rateProduct.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+            state.isSuccess = false;
+            state.message = action.error;
+        });
+
     }
 })
 

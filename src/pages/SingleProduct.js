@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Meta from '../components/Meta';
 import BreadCrumb from '../components/BreadCrumb';
 import Container from '../components/Container';
@@ -7,20 +7,74 @@ import ReactImageZoom from "react-image-zoom";
 import Color from '../components/Color';
 import { TbGitCompare } from "react-icons/tb";
 import { AiOutlineHeart } from "react-icons/ai";
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { products } from '../utils/Data';
+import {useDispatch, useSelector} from 'react-redux';
+import { addToWishlist, getAProducts, rateProduct } from '../features/products/productSlice';
+import * as yup from 'yup';
+import { useFormik } from 'formik';
+import { toast } from 'react-toastify';
+
+const reviewSchema = yup.object().shape({ 
+  prodId: yup.string().required('Product id is required'),
+  star: yup.number().required('Rating is required'),
+  comment: yup.string().required('Comment is required')
+})
+
 
 const SingleProduct = () => {
+
+    const {id} = useParams();
+    const [orderedProduct, setorderedProduct] = useState(true);
+    const dispatch = useDispatch();
+    const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+
+
+    const getAProduct = ()=>{
+      dispatch(getAProducts(id))
+    }
+    useEffect(()=>{getAProduct()},[])
+
+    const product = useSelector(state=>state?.product?.singleProduct)
+
+  //   if(product?.ratings?.length > 0){
+  //     const res =  product?.ratings.find(rating=>rating.postedby === user?._id)        
+  //     if(res){
+  //         setorderedProduct(false)
+  //     }
+  // }
+
+
+    const addToWishlistFunc = (productId) => {
+      dispatch(addToWishlist(productId));  
+    }
+  
+    const formik = useFormik({
+      initialValues: {
+        prodId: id,
+        star: 4,
+        comment: ''
+      },
+      validationSchema: reviewSchema,
+      onSubmit: (values) => {
+          dispatch(rateProduct(values))
+          
+      },
+    });
+
+
     const props = {
       width: 594,
       height: 600,
       zoomWidth: 600,
   
-      img: "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg",
+      img:
+      product?.images.length > 0 ? product.images[0].url :
+      "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg",
     };
   
-    const [orderedProduct, setorderedProduct] = useState(true);
+  
     const copyToClipboard = (text) => {
       console.log("text", text);
       var textField = document.createElement("textarea");
@@ -33,8 +87,8 @@ const SingleProduct = () => {
     const closeModal = () => {};
     return (
       <>
-        <Meta title={"Product Name"} />
-        <BreadCrumb title="Product Name" />
+        <Meta title={product?.title} />
+        <BreadCrumb title={product?.title} />
         <Container class1="main-product-wrapper py-5 home-wrapper-2">
           <div className="row">
             <div className="col-6">
@@ -44,7 +98,20 @@ const SingleProduct = () => {
                 </div>
               </div>
               <div className="other-product-images d-flex flex-wrap gap-15">
-                <div>
+
+                {product?.images.length > 0 ? 
+                            product.images.map((image,index)=>(
+                              <div key={index}>
+                              <img
+                                src={image.url}
+                                className="img-fluid"
+                                alt=""
+                              />
+                            </div>
+                            ))
+
+                            : <>
+                                            <div>
                   <img
                     src="https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg"
                     className="img-fluid"
@@ -72,26 +139,32 @@ const SingleProduct = () => {
                     alt=""
                   />
                 </div>
-              </div>
-            </div>
+               </>
+              
+              }
+
+
+</div>
+</div>
+
             <div className="col-6">
               <div className="main-product-details">
                 <div className="border-bottom">
                   <h3 className="title">
-                    Kids Headphones Bulk 10 Pack Multi Colored For Students
+                  {product?.title}
                   </h3>
                 </div>
                 <div className="border-bottom py-3">
-                  <p className="price">$ 100</p>
+                  <p className="price">{product?.price}</p>
                   <div className="d-flex align-items-center gap-10">
                     <ReactStars
                       count={5}
                       size={24}
-                      value={4}
+                      value={product?.totalrating}
                       edit={false}
                       activeColor="#ffd700"
                     />
-                    <p className="mb-0 t-review">( 2 Reviews )</p>
+                    <p className="mb-0 t-review">( {product?.ratings?.length} Reviews )</p>
                   </div>
                   <a className="review-btn" href="#review">
                     Write a Review
@@ -100,19 +173,19 @@ const SingleProduct = () => {
                 <div className=" py-3">
                   <div className="d-flex gap-10 align-items-center my-2">
                     <h3 className="product-heading">Type :</h3>
-                    <p className="product-data">Watch</p>
+                    <p className="product-data">{product?.type}</p>
                   </div>
                   <div className="d-flex gap-10 align-items-center my-2">
                     <h3 className="product-heading">Brand :</h3>
-                    <p className="product-data">Havells</p>
+                    <p className="product-data">{product?.brand}</p>
                   </div>
                   <div className="d-flex gap-10 align-items-center my-2">
                     <h3 className="product-heading">Category :</h3>
-                    <p className="product-data">Watch</p>
+                    <p className="product-data">{product?.category}</p>
                   </div>
                   <div className="d-flex gap-10 align-items-center my-2">
                     <h3 className="product-heading">Tags :</h3>
-                    <p className="product-data">Watch</p>
+                    <p className="product-data">{product?.tags}</p>
                   </div>
                   <div className="d-flex gap-10 align-items-center my-2">
                     <h3 className="product-heading">Availablity :</h3>
@@ -137,7 +210,11 @@ const SingleProduct = () => {
                   </div>
                   <div className="d-flex gap-10 flex-column mt-2 mb-3">
                     <h3 className="product-heading">Color :</h3>
-                    <Color />
+                    <ul className="colors ps-0">
+                   {product?.color && product?.color.map((color,index)=>(
+                     <Color key={index} colorName={color} />
+                    ))}
+                   </ul> 
                   </div>
                   <div className="d-flex align-items-center gap-15 flex-row mt-2 mb-3">
                     <h3 className="product-heading">Quantity :</h3>
@@ -170,8 +247,8 @@ const SingleProduct = () => {
                         <TbGitCompare className="fs-5 me-2" /> Add to Compare
                       </Link>
                     </div>
-                    <div>
-                      <Link to="/wishlist">
+                    <div  onClick={(e)=>{e.preventDefault();e.stopPropagation(); addToWishlistFunc(product?._id)}}>
+                      <Link to="/wishlist" >
                         <AiOutlineHeart className="fs-5 me-2" /> Add to Wishlist
                       </Link>
                     </div>
@@ -192,16 +269,17 @@ const SingleProduct = () => {
                         e.preventDefault();
                         e.stopPropagation();
                         copyToClipboard(
-                          "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg"
+                          window.location.href
                         );
                       }}
                     >
-                     www.bitly.com/exampleproduct 
+                     Copy Link
                     </a>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </Container>
         <Container class1="description-wrapper py-5 home-wrapper-2">
@@ -210,10 +288,7 @@ const SingleProduct = () => {
               <h4>Description</h4>
               <div className="bg-white p-3">
                 <p>
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Tenetur nisi similique illum aut perferendis voluptas, quisquam
-                  obcaecati qui nobis officia. Voluptatibus in harum deleniti
-                  labore maxime officia esse eos? Repellat?
+                      {product?.description}
                 </p>
               </div>
             </div>
@@ -231,11 +306,11 @@ const SingleProduct = () => {
                       <ReactStars
                         count={5}
                         size={24}
-                        value={4}
+                        value={product?.totalrating}
                         edit={false}
                         activeColor="#ffd700"
                       />
-                      <p className="mb-0">Based on 2 Reviews</p>
+                      <p className="mb-0">Based on {product?.ratings.length} Reviews</p>
                     </div>
                   </div>
                   {orderedProduct && (
@@ -248,23 +323,30 @@ const SingleProduct = () => {
                 </div>
                 <div className="review-form py-4">
                   <h4>Write a Review</h4>
-                  <form action="" className="d-flex flex-column gap-15">
+                  <form  onSubmit={formik.handleSubmit} action="" className="d-flex flex-column gap-15">
                     <div>
                       <ReactStars
                         count={5}
                         size={24}
-                        value={4}
+                        value={formik.values.star}
+                        onChange={(e) => {
+                          formik.setFieldValue("star", e);
+                        }}
+
                         edit={true}
                         activeColor="#ffd700"
                       />
                     </div>
                     <div>
                       <textarea
-                        name=""
-                        id=""
+                        name="comment"
+                        id="comment"
                         className="w-100 form-control"
                         cols="30"
                         rows="4"
+                        value={formik.values.comment}
+                        onChange={formik.handleChange}
+
                         placeholder="Comments"
                       ></textarea>
                     </div>
@@ -274,25 +356,27 @@ const SingleProduct = () => {
                   </form>
                 </div>
                 <div className="reviews mt-4">
-                  <div className="review">
-                    <div className="d-flex gap-10 align-items-center">
-                      <h6 className="mb-0">Navdeep</h6>
-                      <ReactStars
-                        count={5}
-                        size={24}
-                        value={4}
-                        edit={false}
-                        activeColor="#ffd700"
-                      />
-                    </div>
-                    <p className="mt-3">
-                      Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                      Consectetur fugit ut excepturi quos. Id reprehenderit
-                      voluptatem placeat consequatur suscipit ex. Accusamus dolore
-                      quisquam deserunt voluptate, sit magni perspiciatis quas
-                      iste?
-                    </p>
-                  </div>
+                    {
+                      product?.ratings && product?.ratings.map((rating,index)=>(
+                        <div key={index} className="review">
+                            <h6 className="mb-0">{rating.postedby}</h6>
+                        <div className="d-flex align-items-center gap-10">
+                      
+                          <ReactStars
+                            count={5}
+                            size={24}
+                            value={rating.star}
+                            edit={false}
+                            activeColor="#ffd700"
+                          />
+                  
+                        </div>
+                        <p className="mt-3">{rating.comment}</p>
+                      </div>
+                      ))
+                     
+                        
+                    }
                 </div>
               </div>
             </div>

@@ -24,8 +24,8 @@ const SingleBlog = () => {
 
   return (
     <>
-    <Meta title={blogState.title} />
-    <BreadCrumb title={blogState.title} />
+    <Meta title={blogState?.title} />
+    <BreadCrumb title={blogState?.title} />
     <Container class1="blog-wrapper home-wrapper-2 py-5">
       <div className="row">
         <div className="col-12">

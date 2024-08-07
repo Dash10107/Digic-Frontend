@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom';
 import Container from '../components/Container';
-import { services,blogs,products } from '../utils/Data';
+import { services } from '../utils/Data';
 import Marquee from "react-easy-marquee";
 import BlogCard from '../components/BlogCard';
 import ProductCard from '../components/ProductCard';
