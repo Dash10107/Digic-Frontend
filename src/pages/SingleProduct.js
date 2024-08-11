@@ -11,11 +11,11 @@ import { Link, useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { products } from '../utils/Data';
 import {useDispatch, useSelector} from 'react-redux';
-import { addToWishlist, getAProducts, rateProduct } from '../features/products/productSlice';
+import { addToCart, addToWishlist, getAProducts, rateProduct } from '../features/products/productSlice';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
-
+import { useNavigate } from 'react-router-dom';
 const reviewSchema = yup.object().shape({ 
   prodId: yup.string().required('Product id is required'),
   star: yup.number().required('Rating is required'),
@@ -23,13 +23,17 @@ const reviewSchema = yup.object().shape({
 })
 
 
-const SingleProduct = () => {
 
+const SingleProduct = () => {
+    const navigate= useNavigate();
     const {id} = useParams();
-    const [orderedProduct, setorderedProduct] = useState(true);
+    const [color,setColor] = useState("");
+    const [quantity,setQuantity] = useState(0);
+
+    const [alreadyAdded,setAlreadyAdded] = useState(false);
+
     const dispatch = useDispatch();
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-
 
     const getAProduct = ()=>{
       dispatch(getAProducts(id))
@@ -37,13 +41,7 @@ const SingleProduct = () => {
     useEffect(()=>{getAProduct()},[])
 
     const product = useSelector(state=>state?.product?.singleProduct)
-
-  //   if(product?.ratings?.length > 0){
-  //     const res =  product?.ratings.find(rating=>rating.postedby === user?._id)        
-  //     if(res){
-  //         setorderedProduct(false)
-  //     }
-  // }
+    const cart = useSelector(state=>state?.product?.cart)
 
 
     const addToWishlistFunc = (productId) => {
@@ -63,6 +61,32 @@ const SingleProduct = () => {
       },
     });
 
+    const addToCartFunc = ()=>{
+      if(alreadyAdded === true ){
+        navigate('/cart');
+        return;
+      }
+      if(quantity=== 0 ){
+        toast.warning("Please Choose Item Quantity")
+        return;
+      }
+      if(color === ""){
+        toast.warning("Please Choose Item Color")
+        return;
+      }
+           
+      const item = {
+        productId:product?._id,
+        quantity,
+        color,
+        price:product?.price
+      }
+      dispatch(addToCart(item));
+      navigate('/cart');
+
+
+    }
+
 
     const props = {
       width: 594,
@@ -70,7 +94,7 @@ const SingleProduct = () => {
       zoomWidth: 600,
   
       img:
-      product?.images.length > 0 ? product.images[0].url :
+      product?.images.length > 0 ? product?.images[0]?.url :
       "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg",
     };
   
@@ -84,7 +108,15 @@ const SingleProduct = () => {
       document.execCommand("copy");
       textField.remove();
     };
-    const closeModal = () => {};
+
+
+    useEffect(()=>{
+      if(cart?.find(item=>item.productId?._id === product?._id)){
+        setAlreadyAdded(true);        
+      }
+    }
+    ,[])
+
     return (
       <>
         <Meta title={product?.title} />
@@ -194,49 +226,58 @@ const SingleProduct = () => {
                   <div className="d-flex gap-10 flex-column mt-2 mb-3">
                     <h3 className="product-heading">Size :</h3>
                     <div className="d-flex flex-wrap gap-15">
-                      <span className="badge border border-1 bg-white text-dark border-secondary">
+                      <span className="badge border border-1 bg-white text-dark border-secondary cursor-pointer" >
                         S
                       </span>
-                      <span className="badge border border-1 bg-white text-dark border-secondary">
+                      <span className="badge border border-1 bg-white text-dark border-secondary cursor-pointer" >
                         M
                       </span>
-                      <span className="badge border border-1 bg-white text-dark border-secondary">
-                        XL
+                      <span className="badge border border-1 bg-white text-dark border-secondary cursor-pointer" >
+                        L
                       </span>
-                      <span className="badge border border-1 bg-white text-dark border-secondary">
-                        XXL
+                      <span className="badge border border-1 bg-white text-dark border-secondary cursor-pointer" >
+                        XL
                       </span>
                     </div>
                   </div>
-                  <div className="d-flex gap-10 flex-column mt-2 mb-3">
+                 
+                    {alreadyAdded === false && (  
+                       <div className="d-flex gap-10 flex-column mt-2 mb-3">
                     <h3 className="product-heading">Color :</h3>
                     <ul className="colors ps-0">
                    {product?.color && product?.color.map((color,index)=>(
-                     <Color key={index} colorName={color} />
+                     <Color key={index} colorName={color} setColor={setColor}/>
                     ))}
                    </ul> 
-                  </div>
+                  </div>)}
+     
                   <div className="d-flex align-items-center gap-15 flex-row mt-2 mb-3">
-                    <h3 className="product-heading">Quantity :</h3>
+                  {alreadyAdded === false && (
+                    <>
+                     <h3 className="product-heading">Quantity :</h3>
                     <div className="">
                       <input
                         type="number"
                         name=""
                         min={1}
                         max={10}
+                        value={quantity}
+                        onChange={(e)=>setQuantity(e.target.value)}
                         className="form-control"
                         style={{ width: "70px" }}
                         id=""
                       />
                     </div>
+                      </>)}
+                   
+                    
                     <div className="d-flex align-items-center gap-30 ms-5">
                       <button
-                        className="button border-0"
-                        data-bs-toggle="modal"
-                        data-bs-target="#staticBackdrop"
-                        type="button"
+                      className='button btn'
+                        onClick={addToCartFunc}
                       >
-                        Add to Cart
+                        {alreadyAdded ? "Already Added" : "Add to Cart"}
+
                       </button>
                       <button className="button signup">Buy It Now</button>
                     </div>
@@ -313,7 +354,8 @@ const SingleProduct = () => {
                       <p className="mb-0">Based on {product?.ratings.length} Reviews</p>
                     </div>
                   </div>
-                  {orderedProduct && (
+                  { 
+    product?.ratings.find(rating=>rating.postedby === user?._id) &&        (
                     <div>
                       <a className="text-dark text-decoration-underline" href="/">
                         Write a Review
@@ -359,7 +401,7 @@ const SingleProduct = () => {
                     {
                       product?.ratings && product?.ratings.map((rating,index)=>(
                         <div key={index} className="review">
-                            <h6 className="mb-0">{rating.postedby}</h6>
+                            <h6 className="mb-0">{rating.postedby.firstname + rating.postedby.lastname}</h6>
                         <div className="d-flex align-items-center gap-10">
                       
                           <ReactStars
@@ -393,60 +435,7 @@ const SingleProduct = () => {
           </div>
         </Container>
   
-        <div
-          className="modal fade"
-          id="staticBackdrop"
-          data-bs-backdrop="static"
-          data-bs-keyboard="false"
-          tabindex="-1"
-          aria-labelledby="staticBackdropLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-dialog-centered ">
-            <div className="modal-content">
-              <div className="modal-header py-0 border-0">
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body py-0">
-                <div className="d-flex align-items-center">
-                  <div className="flex-grow-1 w-50">
-                    <img src="images/watch.jpg" className="img-fluid" alt="product imgae" />
-                  </div>
-                  <div className="d-flex flex-column flex-grow-1 w-50">
-                    <h6 className="mb-3">Apple Watch</h6>
-                    <p className="mb-1">Quantity: asgfd</p>
-                    <p className="mb-1">Color: asgfd</p>
-                    <p className="mb-1">Size: asgfd</p>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer border-0 py-0 justify-content-center gap-30">
-                <button type="button" className="button" data-bs-dismiss="modal">
-                  View My Cart
-                </button>
-                <button type="button" className="button signup">
-                  Checkout
-                </button>
-              </div>
-              <div className="d-flex justify-content-center py-3">
-                <Link
-                  className="text-dark"
-                  to="/product"
-                  onClick={() => {
-                    closeModal();
-                  }}
-                >
-                  Continue To Shopping
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </>
     );
   };

@@ -1,7 +1,53 @@
-import React from 'react'
-import {NavLink,Link} from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import {NavLink,Link, useNavigate} from 'react-router-dom'
 import {BsSearch} from "react-icons/bs";
+import { useDispatch, useSelector } from 'react-redux';
+import { getCart } from '../features/products/productSlice';
+import { logoutUser } from '../features/user/userSlice';
 const Header = () => {
+    const navigate  = useNavigate();
+    const dispatch = useDispatch();
+    const [total,setTotal] = useState(0)
+    const [length,setLength] = useState(0)
+
+
+  useEffect(()=>{ dispatch(getCart());},[dispatch])
+
+  const cart = useSelector(state=>state?.product?.cart);
+
+
+
+
+
+const user = JSON.parse(localStorage.getItem('user'));
+
+const logoutFunc = ()=>{
+  // dispatch(logoutUser());
+  // localStorage.removeItem('user');
+  navigate('/');
+}
+
+const handleClick = ()=>{
+  if(user){
+    logoutFunc();
+  }
+  else{
+    navigate('/login');
+  }
+}
+
+useEffect(()=>{
+
+const length = cart?.length
+setLength(length)
+  const total  = cart?.reduce(
+  (accumulator, item) => accumulator + (item?.quantity*item?.price),0
+);
+
+setTotal(total);
+
+},[cart])
+
   return (
 <>
     <header className="header-top-strip py-3">
@@ -34,8 +80,10 @@ const Header = () => {
             <div className="header-upper-links d-flex align-items-center justify-content-between">
          <div className=""><Link to="compareproduct" className='text-white d-flex align-items-center  gap-10'><img src="/images/compare.svg" alt=""/> <p className='mb-0'>Compare <br/> Products</p></Link></div>
          <div className=""><Link to="wishlist" className='text-white d-flex align-items-center  gap-10'><img src="/images/wishlist.svg" alt=""/><p className='mb-0'>Favourite <br/> Wishlist</p></Link></div>
-         <div className=""><Link to="/login" className='text-white d-flex align-items-center  gap-10'><img src="/images/user.svg" alt=""/>    <p className='mb-0'>Log In <br/> My Account</p></Link></div>
-         <div className=""><Link to="/cart" className='text-white d-flex align-items-center  gap-10'><img src="/images/cart.svg" alt=""/><div className="d-flex flex-column gap-10"><span className="badge bg-white text-dark">0</span><p className='mb-0'>$ 00.00</p></div> </Link></div>
+         <div className="">
+          <button onClick={handleClick} className='text-white d-flex bg-transparent border-0 align-items-center  gap-10'><img src="/images/user.svg" alt=""/> 
+            <p className='mb-0'> {user ? "Log Out": "Log In"}  <br/> My Account</p></button></div>
+         <div className=""><Link to="/cart" className='text-white d-flex align-items-center  gap-10'><img src="/images/cart.svg" alt=""/><div className="d-flex flex-column gap-10"><span className="badge bg-white  text-dark">{length}</span><p className='mb-0'>$ {total}</p></div> </Link></div>
          </div>
           </div>
         </div>

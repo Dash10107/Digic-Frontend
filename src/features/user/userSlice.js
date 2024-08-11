@@ -34,7 +34,19 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+export const logoutUser = createAsyncThunk(
+    'auth/logout',
+    async (thunkAPI) => {
+        try {
+            const response = await authService.logout();
+            return response;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+);
 
+// Get User Wishlist Thunk
 export const getUserWishlist = createAsyncThunk("user/wishlist", async (thunkAPI) => {
     try {
         const response = await authService.getUserWishlist();
@@ -116,6 +128,24 @@ export const authSlice = createSlice({
             state.isSuccess = false;
             state.message = action.error;
         }); 
+        builder.addCase(logoutUser.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(logoutUser.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.isError = false;
+            state.user = {};
+            localStorage.removeItem("user");
+            toast.success("User logged out successfully");
+        })
+        .addCase(logoutUser.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+            state.isSuccess = false;
+            state.message = action.error;
+            toast.error("User logout failed: " + state.message);
+        });
 
     }
 });

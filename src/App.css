@@ -21,6 +21,9 @@
   /* font-size: 12px; */
 
 }
+.cursor-pointer{
+  cursor: pointer;
+}
 .section-heading {
   font-size: 26px;
   line-height: 32px;
