@@ -71,9 +71,63 @@ const getUserWishlist = async () => {
     }
 }
 
+const updateUser = async (userData) => {
+    try {
+        const response = await axios.put(`${base_url}/user/edit-user`, userData, config);
+        if(response.status === 200){
+            return response.data;
+        } else {
+            throw new Error(response.data.message || 'Update failed');
+        }
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        } else {
+            throw new Error('An unknown error occurred');
+        }
+    }
+}
+
+const forgotPasswordToken = async (userData) => {
+    try {
+        const response = await axios.post(`${base_url}/user/forgot-password-token`, userData);
+        if(response.status === 200){
+            return response.data;
+        } else {
+            throw new Error(response.data.message || 'Password reset failed');
+        }
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        } else {
+            throw new Error('An unknown error occurred');
+        }
+    }
+}
+
+const resetPassword = async (data) => {
+    try {
+        const response = await axios.put(`${base_url}/user/reset-password/${data.token}`, {password:data?.password});
+        if(response.status === 200){
+            return response.data;
+        } else {
+            throw new Error(response.data.message || 'Password reset failed');
+        }
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.message) {
+            throw new Error(error.response.data.message);
+        } else {
+            throw new Error('An unknown error occurred');
+        }
+    }
+}
+
 export const authService = {
     register,
     login,
     logout,
-    getUserWishlist
+    getUserWishlist,
+    updateUser,
+    forgotPasswordToken,
+    resetPassword
 }

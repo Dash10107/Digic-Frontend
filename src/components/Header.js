@@ -2,16 +2,23 @@ import React, { useEffect, useState } from 'react'
 import {NavLink,Link, useNavigate} from 'react-router-dom'
 import {BsSearch} from "react-icons/bs";
 import { useDispatch, useSelector } from 'react-redux';
-import { getCart } from '../features/products/productSlice';
-import { logoutUser } from '../features/user/userSlice';
+import { getAllProducts, getCart } from '../features/products/productSlice';
+import {Typeahead} from "react-bootstrap-typeahead"
+import "react-bootstrap-typeahead/css/Typeahead.css"
+
 const Header = () => {
     const navigate  = useNavigate();
     const dispatch = useDispatch();
     const [total,setTotal] = useState(0)
     const [length,setLength] = useState(0)
-
-
-  useEffect(()=>{ dispatch(getCart());},[dispatch])
+    const [paginate,setPaginate] = useState(true)
+    const products = useSelector(state=>state?.product?.products);
+    const [options,setOptions] = useState([]);
+    useEffect(()=>{ dispatch(getCart());dispatch(getAllProducts())},[dispatch])
+    useEffect(()=>{
+        const options = products?.map(product=>({id:product?._id,name:product?.title}))
+        setOptions(options)
+    },[products])
 
   const cart = useSelector(state=>state?.product?.cart);
 
@@ -22,14 +29,13 @@ const Header = () => {
 const user = JSON.parse(localStorage.getItem('user'));
 
 const logoutFunc = ()=>{
-  // dispatch(logoutUser());
-  // localStorage.removeItem('user');
-  navigate('/');
+localStorage.clear()
+window.location.reload();
 }
 
 const handleClick = ()=>{
   if(user){
-    logoutFunc();
+      navigate("/my-profile");
   }
   else{
     navigate('/login');
@@ -70,7 +76,24 @@ setTotal(total);
           <div className="col-2"><h2 ><Link className='text-white'>Digic</Link></h2></div>
           <div className="col-5">
           <div className="input-group mb-3">
-  <input type="text" className="form-control py-2" placeholder="Search Product Here..." aria-label="Search Product Here..." aria-describedby="basic-addon2"></input>
+
+  {/* <input type="text" className="form-control py-2" placeholder="Search Product Here..." aria-label="Search Product Here..." aria-describedby="basic-addon2"></input> */}
+  <Typeahead
+  id="basic-typeahead-single"
+  labelKey="name"
+  onChange={(selected) => {
+    if(selected.length > 0){
+      navigate(`/product/${selected[0].id}`)
+    }
+  }}
+  options={options}
+  placeholder="Search Product Here..."
+  paginate={paginate}
+  minLength={2}
+  onPaginate={(e)=>{
+    setPaginate(e)
+  }}
+/>
   <span className="input-group-text p-3" id="basic-addon2">
     <BsSearch className='fs-5'/>
   </span>
@@ -82,7 +105,7 @@ setTotal(total);
          <div className=""><Link to="wishlist" className='text-white d-flex align-items-center  gap-10'><img src="/images/wishlist.svg" alt=""/><p className='mb-0'>Favourite <br/> Wishlist</p></Link></div>
          <div className="">
           <button onClick={handleClick} className='text-white d-flex bg-transparent border-0 align-items-center  gap-10'><img src="/images/user.svg" alt=""/> 
-            <p className='mb-0'> {user ? "Log Out": "Log In"}  <br/> My Account</p></button></div>
+          {user ? <p className='mb-0'> Welcome  <br/> {user?.firstname }</p>:<p className='mb-0'> Log In  <br/> My Account</p> }  </button></div>
          <div className=""><Link to="/cart" className='text-white d-flex align-items-center  gap-10'><img src="/images/cart.svg" alt=""/><div className="d-flex flex-column gap-10"><span className="badge bg-white  text-dark">{length}</span><p className='mb-0'>$ {total}</p></div> </Link></div>
          </div>
           </div>
@@ -109,8 +132,10 @@ setTotal(total);
               <div className="d-flex align-items-center gap-15">
                 <NavLink  to="/">Home</NavLink>
                 <NavLink  to="/product">Our Store</NavLink>
+                <NavLink  to="/order">My Orders</NavLink>
                 <NavLink  to="/blogs">Blogs</NavLink>
                 <NavLink  to="/contact">Contact</NavLink>
+                <button onClick={logoutFunc} className='btn text-white text-uppercase btn-danger'>Logout</button>
               </div>
             </div>
 

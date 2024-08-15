@@ -8,10 +8,15 @@ const SpecialProduct = ({product}) => {
   return (
     <>
       <div className="col-6 mb-3 " >
-        <div className="special-product-card cursor-pointer" onClick={()=>navigate(`product/${product._id}`)}>
+        <div className="special-product-card cursor-pointer" onClick={()=>{
+
+          navigate(`/product/${product._id}`);
+          window.location.reload();
+          window.scrollTo(0,0);
+          }}>
           <div className="d-flex justify-content-between">
             <div>
-              <img src="images/watch.jpg" className="img-fluid" alt="watch" />
+              <img src={product?.images.length > 0 ? product?.images[0].url :  "/images/watch.jpg"} className="img-fluid" width={"80%"} height={"90%"} alt="watch" />
             </div>
             <div className="special-product-content">
               <h5 className="brand">{product?.brand}</h5>

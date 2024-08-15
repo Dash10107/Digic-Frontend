@@ -2,9 +2,11 @@ import axios from 'axios';
 import { base_url, config } from '../../utils/axiosConfig';
 
 
-const getProducts = async () => {
+const getProducts = async (data) => {
     try {
-        const response = await axios.get(`${base_url}/product`);
+        const response = await axios.get(`${base_url}/product?${data?.brand ? `brand=${data.brand}&&`:""}${data?.category ? `category=${data.category}&&`:""}${data?.tag? `tags=${data.tag}&&`:""}${data?.minPrice ? `price[gte]=${data.minPrice}&&`:""}${data?.maxPrice ? `price[lte]=${data.maxPrice}&&`:""}${data?.sort ? `sort=${data.sort}&&`:""}
+
+            `);
         if(response.status === 200){
             return response.data;
         } else {
@@ -177,6 +179,24 @@ const rateTheProduct = async (rating) => {
     }
     }
 
+const getMyOrders = async()=>{
+    try{
+    const response =  await axios.get(`${base_url}/user/get-orders`,config);
+    if(response.status === 200){
+        return response.data;
+    } else {
+        throw new Error(response.data.message || 'Login failed');
+    }
+} catch (error) {
+    if (error.response && error.response.data && error.response.data.message) {
+        throw new Error(error.response.data.message);
+    } else {
+        throw new Error('An unknown error occurred');
+    }
+}
+
+}
+
 export const productService = {
     getProducts,
     getAProduct,
@@ -187,5 +207,6 @@ export const productService = {
     removeProductFromCart,
     updateProductQuantity,
     emptyCart,
-    createOrder
+    createOrder,
+    getMyOrders
 }

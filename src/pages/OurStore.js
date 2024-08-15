@@ -11,6 +11,18 @@ import { getAllProducts } from '../features/products/productSlice';
 
 const OurStore = () => {
   const [grid, setGrid] = useState(4);
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [colors, setColors] = useState([]);
+  // const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [color, setColor] = useState('');
+  const [tag, setTag] = useState('');
+  const [brand, setBrand] = useState('');
+  const [category, setCategory] = useState('');
 
   const dispatch = useDispatch();
   const getProducts = ()=>{
@@ -18,6 +30,34 @@ const OurStore = () => {
   }
 useEffect(()=>{getProducts()},[])
 const productState = useSelector(state=>state?.product?.products);
+useEffect(()=>{
+  const brands = new Set();
+  const categories = new Set();
+  const tags = new Set();
+  const colors = new Set();
+  
+  productState.forEach(item => {
+    if (item?.brand) brands.add(item.brand);
+    if (item?.category) categories.add(item.category);
+    if (item?.tags) tags.add(item.tags);
+    if (item?.color) item.color.forEach(c => colors.add(c));
+    
+  });
+  
+  setBrands([...brands]);
+  setCategories([...categories]);
+  setTags([...tags]);
+  setColors([...colors]);
+  
+  
+  
+  // console.log('brands', [...brands]);
+  // console.log('categories', [...categories]);
+  // console.log('tags', [...tags]);
+  // console.log('colors', [...colors]);
+
+ },[productState])
+
 
 
 
@@ -33,10 +73,18 @@ const productState = useSelector(state=>state?.product?.products);
               <h3 className="filter-title">Shop By Categories</h3>
               <div>
                 <ul className="ps-0">
-                  <li>Watch</li>
-                  <li>Tv</li>
-                  <li>Camera</li>
-                  <li>Laptop</li>
+                  {
+                    categories.map((item,index)=>{
+                      return <li key={index} className="cursor-pointer text-capitalize" onClick={
+                        (e)=>{
+                          e.preventDefault();
+                          setCategory(item);
+                          
+                        }
+                      } >{item}</li>
+                    }
+                    )
+                  }
                 </ul>
               </div>
             </div>
@@ -72,29 +120,39 @@ const productState = useSelector(state=>state?.product?.products);
                 <div className="d-flex align-items-center gap-10">
                   <div className="form-floating">
                     <input
-                      type="email"
+                      type="number"
                       className="form-control"
                       id="floatingInput"
                       placeholder="From"
+                      value={minPrice}
+                      onChange={(e)=>{setMinPrice(e.target.value)}}
                     />
                     <label htmlFor="floatingInput">From</label>
                   </div>
                   <div className="form-floating">
                     <input
-                      type="email"
+                      type="number"
                       className="form-control"
                       id="floatingInput1"
                       placeholder="To"
+                      value={maxPrice}
+                      onChange={(e)=>{setMaxPrice(e.target.value)}}
                     />
                     <label htmlFor="floatingInput1">To</label>
                   </div>
                 </div>
                 <h5 className="sub-title">Colors</h5>
                 <div>
-                  <Color />
+                  <ul className="d-flex flex-wrap gap-10 colors">
+                    {
+                      colors.map((item,index)=>{
+                        return <Color key={index} colorName={item} setColor={setColor}/>
+                      })
+                    }
+                    </ul>
                 </div>
-                <h5 className="sub-title">Size</h5>
-                <div>
+            
+                {/* <div>
                   <div className="form-check">
                     <input
                       className="form-check-input"
@@ -117,25 +175,53 @@ const productState = useSelector(state=>state?.product?.products);
                       M (2)
                     </label>
                   </div>
-                </div>
+                </div> */}
+                    <h5 className="sub-title">Brands</h5>
+                  <div className="filter-card mb-3">      
+              
+                <div className="product-tags d-flex flex-wrap align-items-center gap-10">
+                  {
+                    brands?.map((item,index)=>{
+                      return <span key={index} className="badge bg-light text-secondary rounded-3 py-2 px-3 cursor-pointer" 
+                      onClick={
+                        (e)=>{
+                          e.preventDefault();
+                          setBrand(item);
+                      }}
+                      >{item}</span>
+                    }
+                    )
+                  }
+              </div>
+            </div>
+            <button className="btn button w-100" 
+            onClick={()=>{
+              console.log('brand',brand);
+              console.log('category',category);
+              console.log('tag',tag);
+              console.log('minPrice',minPrice);
+              console.log('maxPrice',maxPrice);
+              console.log('sort',sort);            
+              dispatch(getAllProducts({brand,category,tag,minPrice,maxPrice,sort}));  
+            } }
+            >Filter</button>
               </div>
             </div>
             <div className="filter-card mb-3">
               <h3 className="filter-title">Product Tags</h3>
               <div>
                 <div className="product-tags d-flex flex-wrap align-items-center gap-10">
-                  <span className="badge bg-light text-secondary rounded-3 py-2 px-3">
-                    Headphone
-                  </span>
-                  <span className="badge bg-light text-secondary rounded-3 py-2 px-3">
-                    Laptop
-                  </span>
-                  <span className="badge bg-light text-secondary rounded-3 py-2 px-3">
-                    Mobile
-                  </span>
-                  <span className="badge bg-light text-secondary rounded-3 py-2 px-3">
-                    Wire
-                  </span>
+                  {
+                    tags.map((item,index)=>{
+                      return <span key={index} className="text-capitalize badge bg-light text-secondary rounded-3 py-2 px-3"
+                      onClick={
+                        ()=>{
+                          setTag(item);
+                      }}
+                      >{item}</span>
+                    }
+                    )
+                  }
                 </div>
               </div>
             </div>
@@ -201,17 +287,21 @@ const productState = useSelector(state=>state?.product?.products);
                     defaultValue={"manula"}
                     className="form-control form-select"
                     id=""
+                    onChange={(e)=>{
+                      setSort(e.target.value);
+                    }}
+                    value={sort}
                   >
-                    <option value="manual">Featured</option>
-                    <option value="best-selling">Best selling</option>
-                    <option value="title-ascending">Alphabetically, A-Z</option>
-                    <option value="title-descending">
+                    {/* <option value="manual">Featured</option> */}
+                    {/* <option value="best-selling">Best selling</option> */}
+                    <option value="title">Alphabetically, A-Z</option>
+                    <option value="-title">
                       Alphabetically, Z-A
                     </option>
-                    <option value="price-ascending">Price, low to high</option>
-                    <option value="price-descending">Price, high to low</option>
-                    <option value="created-ascending">Date, old to new</option>
-                    <option value="created-descending">Date, new to old</option>
+                    <option value="price">Price, low to high</option>
+                    <option value="-price">Price, high to low</option>
+                    <option value="createdAt">Date, old to new</option>
+                    <option value="-createdAt">Date, new to old</option>
                   </select>
                 </div>
                 <div className="d-flex align-items-center gap-10">

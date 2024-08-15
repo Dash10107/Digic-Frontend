@@ -18,18 +18,20 @@ const loginSchema = yup.object().shape({
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch()
-
+  // const authState = useSelector((state) => state?.auth?.user);
   const formik = useFormik({
     initialValues: {
       email: '',
       password: ''
     },
     validationSchema: loginSchema,
-    onSubmit:async(values) => {
-      const result = await dispatch(loginUser(values));
-      if (loginUser.fulfilled.match(result)) {
-          navigate('/'); // Navigate to home on successful login
+    onSubmit:(values) => {
+      dispatch(loginUser(values));
+      setTimeout(()=>{
+      if(localStorage.getItem('user') !== null){
+        navigate('/')
       }
+    },1000)
     }
   })
 

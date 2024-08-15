@@ -3,6 +3,8 @@ import colors from 'color-name';
 
 const Color = ({colorName,setColor}) => {
 
+  colorName = colorName.toLowerCase();
+
   if (colors[colorName]) {
     return (
 

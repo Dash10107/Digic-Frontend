@@ -40,9 +40,14 @@ const ProductCard = (props) => {
                 <img src={image.url} key={index} className="img-fluid  mx-auto" width={160} alt="" />
               ))
 
-            } */}
-            <img src={ "../images/watch.jpg"} className="img-fluid  mx-auto" width={160}  alt="" />
-            <img src={ "../images/watch-1.avif"} className="img-fluid  mx-auto" width={160} alt="" />
+            }
+              {
+                product?.images?.length === 0 && (<> */}
+
+          <img src={ product?.images?.length > 0 ? product?.images[0]?.url :  "../images/watch.jpg"} className="img-fluid  mx-auto" width={160}  alt="" />
+          <img src={ product?.images?.length > 0 ? (product?.images[1]?.url ? product?.images[1]?.url  :   product?.images[0]?.url) :  "../images/watch-1.avif"} className="img-fluid  mx-auto" width={160} alt="" />
+                
+              
           </div>
           <div className="product-details">
             <h6 className="brand">{product.brand}</h6>

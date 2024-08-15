@@ -8,14 +8,15 @@ import Color from '../components/Color';
 import { TbGitCompare } from "react-icons/tb";
 import { AiOutlineHeart } from "react-icons/ai";
 import { Link, useParams } from 'react-router-dom';
-import ProductCard from '../components/ProductCard';
-import { products } from '../utils/Data';
+// import ProductCard from '../components/ProductCard';
+// import { products } from '../utils/Data';
 import {useDispatch, useSelector} from 'react-redux';
-import { addToCart, addToWishlist, getAProducts, rateProduct } from '../features/products/productSlice';
+import { addToCart, addToWishlist, getAProducts, getAllProducts, rateProduct } from '../features/products/productSlice';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import SpecialProduct from '../components/SpecialProduct';
 const reviewSchema = yup.object().shape({ 
   prodId: yup.string().required('Product id is required'),
   star: yup.number().required('Rating is required'),
@@ -29,20 +30,34 @@ const SingleProduct = () => {
     const {id} = useParams();
     const [color,setColor] = useState("");
     const [quantity,setQuantity] = useState(0);
-
+    const [props, setProps] = useState();
     const [alreadyAdded,setAlreadyAdded] = useState(false);
 
     const dispatch = useDispatch();
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-
+  
     const getAProduct = ()=>{
       dispatch(getAProducts(id))
     }
-    useEffect(()=>{getAProduct()},[])
+    useEffect(()=>{getAProduct();dispatch(getAllProducts())},[])
 
     const product = useSelector(state=>state?.product?.singleProduct)
     const cart = useSelector(state=>state?.product?.cart)
+    const products = useSelector(state=>state?.product?.products)
 
+    useEffect(() => {
+      if (product?.images?.length > 0) {
+        setProps({
+          width: 594,
+          height: 600,
+          zoomWidth: 600,
+      
+          img:
+          product?.images.length > 0 ? product?.images[0]?.url : "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg",
+
+        });
+      }
+    }, [product]);
 
     const addToWishlistFunc = (productId) => {
       dispatch(addToWishlist(productId));  
@@ -88,15 +103,7 @@ const SingleProduct = () => {
     }
 
 
-    const props = {
-      width: 594,
-      height: 600,
-      zoomWidth: 600,
-  
-      img:
-      product?.images.length > 0 ? product?.images[0]?.url :
-      "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg",
-    };
+
   
   
     const copyToClipboard = (text) => {
@@ -115,7 +122,7 @@ const SingleProduct = () => {
         setAlreadyAdded(true);        
       }
     }
-    ,[])
+    ,[cart,product])
 
     return (
       <>
@@ -126,7 +133,13 @@ const SingleProduct = () => {
             <div className="col-6">
               <div className="main-product-image">
                 <div>
-                  <ReactImageZoom {...props} />
+                  {/* <ReactImageZoom {...props} /> */}
+                  <img
+                    src={product?.images.length > 0 ? product?.images[0]?.url : "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?cs=srgb&dl=pexels-fernando-arcos-190819.jpg&fm=jpg"}
+                    className="img-fluid "
+       
+                    alt=""
+                  />
                 </div>
               </div>
               <div className="other-product-images d-flex flex-wrap gap-15">
@@ -351,18 +364,12 @@ const SingleProduct = () => {
                         edit={false}
                         activeColor="#ffd700"
                       />
-                      <p className="mb-0">Based on {product?.ratings.length} Reviews</p>
+                      <p className="mb-0">Based on {product?.ratings?.length} Reviews</p>
                     </div>
                   </div>
+                  </div>
                   { 
-    product?.ratings.find(rating=>rating.postedby === user?._id) &&        (
-                    <div>
-                      <a className="text-dark text-decoration-underline" href="/">
-                        Write a Review
-                      </a>
-                    </div>
-                  )}
-                </div>
+    product?.ratings?.find(rating=>rating.postedby?._id === user?._id) === undefined &&        (
                 <div className="review-form py-4">
                   <h4>Write a Review</h4>
                   <form  onSubmit={formik.handleSubmit} action="" className="d-flex flex-column gap-15">
@@ -372,7 +379,7 @@ const SingleProduct = () => {
                         size={24}
                         value={formik.values.star}
                         onChange={(e) => {
-                          formik.setFieldValue("star", e);
+                          formik.setFieldValue("star", parseInt(e));
                         }}
 
                         edit={true}
@@ -397,6 +404,9 @@ const SingleProduct = () => {
                     </div>
                   </form>
                 </div>
+                  )}
+                
+
                 <div className="reviews mt-4">
                     {
                       product?.ratings && product?.ratings.map((rating,index)=>(
@@ -431,7 +441,15 @@ const SingleProduct = () => {
             </div>
           </div>
           <div className="row">
-            <ProductCard product={products[0]} />
+          {
+          products?.slice(0,4).map((product)=>{
+            if(product.tags === "special"){
+              return <SpecialProduct product={product}  />
+            }else{
+              return <></>
+            }
+})
+        }
           </div>
         </Container>
   

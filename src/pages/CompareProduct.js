@@ -11,7 +11,7 @@ const CompareProduct = () => {
     <Container class1="compare-product-wrapper py-5 home-wrapper-2">
       <div className="row">
         <div className="col-3">
-          <div className="compare-product-card position-relative">
+          {/* <div className="compare-product-card position-relative">
             <img
               src="../images/watch.jpg"
               alt="cross"
@@ -52,10 +52,10 @@ const CompareProduct = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
         <div className="col-3">
-          <div className="compare-product-card position-relative">
+          {/* <div className="compare-product-card position-relative">
             <img
               src="images/cross.svg"
               alt="cross"
@@ -85,7 +85,7 @@ const CompareProduct = () => {
                 </div>
                 <div className="product-detail">
                   <h5>Color:</h5>
-                  <Color />
+                   <Color /> 
                 </div>
                 <div className="product-detail">
                   <h5>Size:</h5>
@@ -96,7 +96,7 @@ const CompareProduct = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </Container>
