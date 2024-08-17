@@ -1,4 +1,4 @@
-export const base_url = "http://localhost:5000/api";
+export const base_url = "https://digic-backend.vercel.app/api";
 
 const getTokenFromLocalStorage =  localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).token : null;
 
