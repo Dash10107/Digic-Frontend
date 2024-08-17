@@ -11,7 +11,7 @@ import { Link, useParams } from 'react-router-dom';
 // import ProductCard from '../components/ProductCard';
 // import { products } from '../utils/Data';
 import {useDispatch, useSelector} from 'react-redux';
-import { addToCart, addToWishlist, getAProducts, getAllProducts, rateProduct } from '../features/products/productSlice';
+import { addProductToCompare, addToCart, addToWishlist, getAProducts, getAllProducts, rateProduct } from '../features/products/productSlice';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
@@ -103,11 +103,17 @@ const SingleProduct = () => {
     }
 
 
+    const addToCompare = (e)=>{
+      e.preventDefault()
+      e.stopPropagation()
 
+      dispatch(addProductToCompare(product))
+      navigate("/compareproduct")
+    }
   
   
     const copyToClipboard = (text) => {
-      console.log("text", text);
+
       var textField = document.createElement("textarea");
       textField.innerText = text;
       document.body.appendChild(textField);
@@ -297,9 +303,9 @@ const SingleProduct = () => {
                   </div>
                   <div className="d-flex align-items-center gap-15">
                     <div>
-                      <Link to="/compareproduct">
+                      <button className='btn' onClick={addToCompare}>
                         <TbGitCompare className="fs-5 me-2" /> Add to Compare
-                      </Link>
+                      </button>
                     </div>
                     <div  onClick={(e)=>{e.preventDefault();e.stopPropagation(); addToWishlistFunc(product?._id)}}>
                       <Link to="/wishlist" >

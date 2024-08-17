@@ -8,6 +8,9 @@ import Color from '../components/Color';
 
 import {useDispatch, useSelector} from 'react-redux';
 import { getAllProducts } from '../features/products/productSlice';
+import ResponsivePagination from 'react-responsive-pagination';
+import 'react-responsive-pagination/themes/classic.css';
+
 
 const OurStore = () => {
   const [grid, setGrid] = useState(4);
@@ -15,6 +18,8 @@ const OurStore = () => {
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
   const [colors, setColors] = useState([]);
+  const [limit, setLimit] = useState();
+  const [page, setPage] = useState(1);
   // const [query, setQuery] = useState('');
   const [sort, setSort] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -23,14 +28,24 @@ const OurStore = () => {
   const [tag, setTag] = useState('');
   const [brand, setBrand] = useState('');
   const [category, setCategory] = useState('');
-
+  const [total, setTotal] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false); 
   const dispatch = useDispatch();
+
   const getProducts = ()=>{
-    dispatch(getAllProducts());
+    dispatch(getAllProducts({limit:"6",page:"1"}));
   }
-useEffect(()=>{getProducts()},[])
+useEffect(()=>{getProducts(); },[])
 const productState = useSelector(state=>state?.product?.products);
+
+useEffect(() => {
+  if (total === 0 && productState.length > 0) {
+    setTotal(productState.length);
+  }
+}, [productState, total]);
+
 useEffect(()=>{
+  if (!isInitialized && productState.length > 0) {
   const brands = new Set();
   const categories = new Set();
   const tags = new Set();
@@ -48,15 +63,15 @@ useEffect(()=>{
   setCategories([...categories]);
   setTags([...tags]);
   setColors([...colors]);
-  
-  
-  
-  // console.log('brands', [...brands]);
-  // console.log('categories', [...categories]);
-  // console.log('tags', [...tags]);
-  // console.log('colors', [...colors]);
+      setIsInitialized(true); // Mark as initialized
+    }
+  }, [productState, isInitialized]);
 
- },[productState])
+
+
+useEffect(() => {
+  dispatch(getAllProducts({ brand, category, tag, minPrice, maxPrice, sort, page, limit }));
+}, [page, limit, sort, brand, category, tag, minPrice, maxPrice, color,dispatch]);
 
 
 
@@ -75,13 +90,32 @@ useEffect(()=>{
                 <ul className="ps-0">
                   {
                     categories.map((item,index)=>{
-                      return <li key={index} className="cursor-pointer text-capitalize" onClick={
-                        (e)=>{
-                          e.preventDefault();
-                          setCategory(item);
-                          
-                        }
-                      } >{item}</li>
+                      return (
+                        <li
+                          key={index}
+                          className={`cursor-pointer text-capitalize relative px-4 py-2 rounded ${
+                            category === item ? 'highlight' : ''
+                          }`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCategory(item);
+                          }}
+                        >
+                          {item}
+                          {category === item && (
+                            <span
+                              className="top-0 right-0 px-2 py-1 text-sm cursor-pointer text-white rounded-full "
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent triggering the parent onClick
+                                setCategory('');
+                              }}
+                            >
+                              &times;
+                            </span>
+                          )}
+                        </li>
+                      );
+                      
                     }
                     )
                   }
@@ -151,58 +185,44 @@ useEffect(()=>{
                     }
                     </ul>
                 </div>
-            
-                {/* <div>
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      value=""
-                      id="color-1"
-                    />
-                    <label className="form-check-label" htmlFor="color-1">
-                      S (2)
-                    </label>
-                  </div>
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      value=""
-                      id="color-2"
-                    />
-                    <label className="form-check-label" htmlFor="color-2">
-                      M (2)
-                    </label>
-                  </div>
-                </div> */}
+
                     <h5 className="sub-title">Brands</h5>
                   <div className="filter-card mb-3">      
               
                 <div className="product-tags d-flex flex-wrap align-items-center gap-10">
                   {
                     brands?.map((item,index)=>{
-                      return <span key={index} className="badge bg-light text-secondary rounded-3 py-2 px-3 cursor-pointer" 
+                      return <span key={index} 
+                      className={`badge bg-light text-secondary rounded-3 py-2 px-3 cursor-pointer ${
+                        brand === item ? 'bg-dark text-white' : ''
+                      }`}
+                       
                       onClick={
                         (e)=>{
                           e.preventDefault();
                           setBrand(item);
                       }}
-                      >{item}</span>
+                      >{item}
+                                                {brand === item && (
+                            <span
+                              className="top-0 right-0 px-2 py-1 text-sm cursor-pointer text-white rounded-full "
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent triggering the parent onClick
+                                setBrand('');
+                              }}
+                            >
+                              &times;
+                            </span>
+                          )}
+                      </span>
                     }
                     )
                   }
               </div>
             </div>
             <button className="btn button w-100" 
-            onClick={()=>{
-              console.log('brand',brand);
-              console.log('category',category);
-              console.log('tag',tag);
-              console.log('minPrice',minPrice);
-              console.log('maxPrice',maxPrice);
-              console.log('sort',sort);            
-              dispatch(getAllProducts({brand,category,tag,minPrice,maxPrice,sort}));  
+            onClick={()=>{          
+               dispatch(getAllProducts({brand,category,tag,minPrice,maxPrice,sort,page,limit}));  
             } }
             >Filter</button>
               </div>
@@ -213,12 +233,28 @@ useEffect(()=>{
                 <div className="product-tags d-flex flex-wrap align-items-center gap-10">
                   {
                     tags.map((item,index)=>{
-                      return <span key={index} className="text-capitalize badge bg-light text-secondary rounded-3 py-2 px-3"
+                      return <span key={index} 
+                      className={`badge bg-light text-secondary rounded-3 py-2 px-3 cursor-pointer ${
+                        tag === item ? 'bg-dark text-white' : ''
+                      }`}
+
                       onClick={
                         ()=>{
                           setTag(item);
                       }}
-                      >{item}</span>
+                      >{item}
+                      {tag === item && (
+                            <span
+                              className="px-2 py-1 text-sm cursor-pointer text-white rounded-full "
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent triggering the parent onClick
+                                setTag('');
+                              }}
+                            >
+                              &times;
+                            </span>
+                          )}
+                      </span>
                     }
                     )
                   }
@@ -228,7 +264,7 @@ useEffect(()=>{
             <div className="filter-card mb-3">
               <h3 className="filter-title">Random Product</h3>
               <div>
-                <div className="random-products mb-3 d-flex">
+                <div className="random-products mb-3 d-flex" >
                   <div className="w-50">
                     <img
                       src="images/watch.jpg"
@@ -305,11 +341,12 @@ useEffect(()=>{
                   </select>
                 </div>
                 <div className="d-flex align-items-center gap-10">
-                  <p className="totalproducts mb-0">{productState.length} Products</p>
+                  <p className="totalproducts mb-0">{total} Products</p>
                   <div className="d-flex gap-10 align-items-center grid">
                     <img
                       onClick={() => {
                         setGrid(3);
+                        setLimit(8);
                       }}
                       src="images/gr4.svg"
                       className="d-block img-fluid"
@@ -318,6 +355,7 @@ useEffect(()=>{
                     <img
                       onClick={() => {
                         setGrid(4);
+                        setLimit(6);
                       }}
                       src="images/gr3.svg"
                       className="d-block img-fluid"
@@ -326,6 +364,7 @@ useEffect(()=>{
                     <img
                       onClick={() => {
                         setGrid(6);
+                        setLimit(4);
                       }}
                       src="images/gr2.svg"
                       className="d-block img-fluid"
@@ -335,6 +374,7 @@ useEffect(()=>{
                     <img
                       onClick={() => {
                         setGrid(12);
+                        setLimit(2);
                       }}
                       src="images/gr.svg"
                       className="d-block img-fluid"
@@ -350,10 +390,17 @@ useEffect(()=>{
                   
                 return(<ProductCard grid={grid} key={index} product={item} />)
 })}
-
-                
+ 
               </div>
+             
             </div>
+            <ResponsivePagination
+  current={page}
+  // total={ limit ? Math.ceil(productState?.length * limit ) : productState?.length} // Calculate the total pages
+total={total}
+onPageChange={(newPage) => setPage(newPage)}
+/>
+
           </div>
         </div>
       </Container>

@@ -109,6 +109,7 @@ export const getMyOrders = createAsyncThunk("product/get-myorders", async (order
 
 const initialState = {
     products:[],
+    compareProduct:[],
     isError: false,
     isSuccess: false,
     isLoading: false,
@@ -118,6 +119,24 @@ const initialState = {
 export const productSlice = createSlice({
     name:"product",
     initialState:initialState,
+    reducers: {
+        addProductToCompare: (state, action) => {
+            const product = action.payload;
+            
+            // Check if the product is already in the compareProduct array
+            const isAlreadyInCompare = state.compareProduct.some(item => item._id === product._id);
+
+            if (!isAlreadyInCompare) {
+                state.compareProduct.push(product);
+            }
+        },
+        removeProductFromCompare: (state, action) => {
+            const productId = action.payload;
+
+            // Remove the product from the compareProduct array by filtering it out
+            state.compareProduct = state.compareProduct.filter(item => item._id !== productId);
+        }
+    },
     extraReducers:(builder)=>{
         builder
         .addCase(getAllProducts.pending,(state)=>{
@@ -329,4 +348,5 @@ export const productSlice = createSlice({
     }
 })
 
+export const { addProductToCompare, removeProductFromCompare } = productSlice.actions;
 export default productSlice.reducer;

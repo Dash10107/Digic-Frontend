@@ -2,7 +2,7 @@ import React from "react";
 import ReactStars from "react-rating-stars-component";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch,useSelector } from "react-redux";
-import { addToWishlist } from "../features/products/productSlice";
+import { addProductToCompare, addToWishlist } from "../features/products/productSlice";
 const ProductCard = (props) => {
   const { grid,product } = props;
   let location = useLocation();
@@ -12,6 +12,10 @@ const ProductCard = (props) => {
     dispatch(addToWishlist(productId));  
   }
 
+  const addToCompare = (e)=>{
+    e.preventDefault();
+    dispatch(addProductToCompare(product))
+  }
 
 
 
@@ -68,7 +72,7 @@ const ProductCard = (props) => {
           </div>
           <div className="action-bar position-absolute">
             <div className="d-flex flex-column gap-15">
-              <button className="border-0 bg-transparent">
+              <button className="border-0 bg-transparent" onClick={addToCompare}>
                 <img src="../images/prodcompare.svg" alt="compare" />
               </button>
               <button className="border-0 bg-transparent">

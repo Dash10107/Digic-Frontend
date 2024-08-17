@@ -68,6 +68,16 @@ a {
   background-color: var(--color-febd69);
   color: #131921;
 }
+
+.highlight {
+  background-color: #232f3e; /* Light blue background */
+  color: #fff; /* Dark text color for contrast */
+  font-weight: bold;
+  position: relative; 
+}
+
+
+
 /* Header Part */
 
 .header-top-strip {

@@ -41,12 +41,12 @@ const Checkout = () => {
     validationSchema: shippingSchema,
     onSubmit: values => {
       // Handle form submission
-      const orderItems = cart?.map(item => ({
-        productId: item.productId._id,
-        quantity: item.quantity,
-        price: item.price,
-        color: item.color,
-      }));
+      // const orderItems = cart?.map(item => ({
+      //   productId: item.productId._id,
+      //   quantity: item.quantity,
+      //   price: item.price,
+      //   color: item.color,
+      // }));
       
       setShippingInfo(values);
     

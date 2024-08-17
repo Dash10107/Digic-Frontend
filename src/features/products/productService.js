@@ -4,9 +4,7 @@ import { base_url, config } from '../../utils/axiosConfig';
 
 const getProducts = async (data) => {
     try {
-        const response = await axios.get(`${base_url}/product?${data?.brand ? `brand=${data.brand}&&`:""}${data?.category ? `category=${data.category}&&`:""}${data?.tag? `tags=${data.tag}&&`:""}${data?.minPrice ? `price[gte]=${data.minPrice}&&`:""}${data?.maxPrice ? `price[lte]=${data.maxPrice}&&`:""}${data?.sort ? `sort=${data.sort}&&`:""}
-
-            `);
+        const response = await axios.get(`${base_url}/product?${data?.brand ? `brand=${data.brand}&&`:""}${data?.category ? `category=${data.category}&&`:""}${data?.tag? `tags=${data.tag}&&`:""}${data?.minPrice ? `price[gte]=${data.minPrice}&&`:""}${data?.maxPrice ? `price[lte]=${data.maxPrice}&&`:""}${data?.sort ? `sort=${data.sort}&&`:""}${data?.limit ? `limit=${data.limit}&&`:""}${data?.page ? `page=${data.page}&&`:""} `);
         if(response.status === 200){
             return response.data;
         } else {
