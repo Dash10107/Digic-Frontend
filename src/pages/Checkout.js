@@ -7,7 +7,7 @@ import {useFormik} from "formik";
 import * as yup from "yup";
 import axios from "axios";
 import { Country, State, City }  from 'country-state-city';
-import { config } from '../utils/axiosConfig';
+import { base_url, config } from '../utils/axiosConfig';
 import { createOrder } from '../features/products/productSlice';
 
 const shippingSchema = yup.object({
@@ -99,7 +99,7 @@ const Checkout = () => {
       alert('Razorpay SDK failed to load. Are you online?')
       return
     }
-    const result = await axios.post('http://localhost:5000/api/user/order/checkout',{amount:total+5},config);
+    const result = await axios.post(`${base_url}/user/order/checkout`,{amount:total+5},config);
     if(!result){
       alert('Server error. Are you online?')
       return
@@ -121,7 +121,7 @@ const Checkout = () => {
               razorpaySignature: response.razorpay_signature,
           };
 
-          await axios.post("http://localhost:5000/api/user/order/paymentVerification", data,config);
+          await axios.post(`${base_url}/user/order/paymentVerification`, data,config);
           
           const orderItems = cart?.map(item => ({
             productId: item.productId._id,
