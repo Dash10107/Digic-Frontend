@@ -32,8 +32,7 @@ To run this project on your local machine, follow these simple steps:
 1. Clone the repository:
    ```bash
    git clone https://github.com/Dash10107/Digic-Frontend/
+   cd Digic-Frontend
+   npm install
+   npm run start
 
-  cd Digic-Frontend
-  npm install
-  npm run start
-        ```bash
